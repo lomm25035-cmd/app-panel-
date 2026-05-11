@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUCHUY PANEL PRO</title>
+
+<style>
+body{
+margin:0;
+background:black;
+color:#00ff9d;
+font-family:monospace;
+}
+
+/* container bo tròn */
+.box{
+width:360px;
+margin:40px auto;
+border:1px solid #00ff9d;
+padding:18px;
+border-radius:15px;
+background:rgba(0,0,0,0.85);
+}
+
+input,button{
+width:100%;
+padding:10px;
+margin-top:8px;
+background:black;
+color:#00ff9d;
+border:1px solid #00ff9d;
+border-radius:10px;
+outline:none;
+}
+
+button:hover{
+background:#00ff9d;
+color:black;
+}
+
+/* MAIN PANEL */
+.hidden{display:none;}
+
+h2{
+text-align:center;
+animation:glitch 1s infinite;
+}
+
+@keyframes glitch{
+0%{text-shadow:2px 0 red,-2px 0 blue}
+50%{text-shadow:-2px 0 red,2px 0 blue}
+100%{text-shadow:2px 0 red,-2px 0 blue}
+}
+
+/* button panel */
+.btn{
+border-radius:12px;
+margin-top:6px;
+}
+
+.active{
+background:#00ff9d;
+color:black;
+}
+
+/* log */
+.log{
+margin-top:10px;
+height:120px;
+overflow:auto;
+border:1px solid #00ff9d;
+border-radius:10px;
+padding:8px;
+font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="box" id="loginBox">
+
+<h2>KEY LOGIN</h2>
+
+<input id="key" placeholder="DUCHUY-XXXX-XXXX-TIMESTAMP">
+
+<!-- device id -->
+<input id="device" readonly>
+
+<button onclick="checkKey()">ENTER PANEL</button>
+
+<p id="msg"></p>
+
+</div>
+
+<!-- MAIN -->
+<div class="box hidden" id="mainBox">
+
+<h2>MAIN PANEL</h2>
+
+<button class="btn" onclick="toggle(this,'TĂNG NHẠY MÀN')">⚡ TĂNG NHẠY</button>
+<button class="btn" onclick="toggle(this,'BÁM ĐẦU')">🎯 BÁM ĐẦU</button>
+<button class="btn" onclick="toggle(this,'NHẸ TÂM')">🔫 NHẸ TÂM</button>
+<button class="btn" onclick="toggle(this,'KHOÁ ĐẦU')">🔒 KHOÁ ĐẦU</button>
+
+<button class="btn" onclick="ios()">🍎 START iOS MODE</button>
+
+<div class="log" id="log"></div>
+
+</div>
+
+<script>
+
+let db = JSON.parse(localStorage.getItem("key_db") || "[]");
+
+/* DEVICE ID AUTO */
+function getDeviceId(){
+return btoa(navigator.userAgent + screen.width + screen.height);
+}
+
+/* show device */
+document.getElementById("device").value = getDeviceId();
+
+/* CHECK KEY + DEVICE LOCK */
+function checkKey(){
+
+let k=document.getElementById("key").value;
+let device=getDeviceId();
+
+let f=db.find(x=>x.key===k);
+
+if(!f){
+document.getElementById("msg").innerText="❌ KEY SAI";
+return;
+}
+
+if(f.locked){
+document.getElementById("msg").innerText="⛔ KEY BỊ KHÓA";
+return;
+}
+
+if(Date.now()>f.exp){
+document.getElementById("msg").innerText="⛔ KEY HẾT HẠN";
+return;
+}
+
+/* DEVICE LOCK LOGIC */
+if(!f.device){
+f.device=device;
+localStorage.setItem("key_db",JSON.stringify(db));
+}
+
+if(f.device !== device){
+document.getElementById("msg").innerText="⛔ KEY ĐÃ KHÓA 1 THIẾT BỊ KHÁC";
+return;
+}
+
+/* OPEN PANEL */
+document.getElementById("loginBox").classList.add("hidden");
+document.getElementById("mainBox").classList.remove("hidden");
+
+}
+
+/* TOGGLE FEATURE */
+function toggle(btn,text){
+btn.classList.toggle("active");
+log(text + " ON/OFF");
+}
+
+/* IOS FAKE MODE */
+function ios(){
+log("✔ iOS MODE START");
+log("✔ LOADING SYSTEM...");
+log("✔ ALL FEATURES ENABLED");
+}
+
+/* LOG */
+function log(t){
+document.getElementById("log").innerHTML+=t+"<br>";
+}
+
+</script>
+
+</body>
+</html>
